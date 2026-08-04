@@ -1,0 +1,119 @@
+// 1️⃣ Paleta personalizada inspirada en tu imagen
+$primary: #004A40;     // Verde profundo - identidad principal
+$secondary: #50c2f7;   // Azul claro - acento fresco
+$success: #e0f2f1;     // Verde agua - fondo suave
+$info: #f9a725;        // Amarillo mostaza - energía y optimismo
+$warning: #ff7043;     // Naranja - llamado a la acción
+$danger: #8d6e63;      // Marrón cálido - contraste natural
+$light: #f5f5f5;      // Blanco cálido - fondo neutro
+$dark: #004A40;        // Reutilizamos el verde oscuro como tono base
+$leaf-400: #469286;
+$leaf-200: #b0dbd6;
+$leaf-100: #cde8e4;
+$leaf-50:  #daecda;
+$white: #ffffff;
+
+// 2️⃣ Extiende el mapa de colores para nuevos nombres
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
+  "earth": #8d6e63,     // tono tierra adicional
+  "sky": #50c2f7,       // azul cielo
+  "leaf": #004A40,      // verde hoja
+  "sun": #f9a725,        // amarillo sol
+  "leaf-400": $leaf-400,
+  "leaf-200": $leaf-200,
+  "leaf-100": $leaf-100,
+  "leaf-50": $leaf-50,
+  "white": $white
+);
+
+// 3️⃣ Importa Bootstrap después de definir tus variables
+@import "bootstrap/scss/bootstrap";
+
+// 4️⃣ (Opcional) Ajustes de tipografía y botones
+body {
+  color: $dark;
+  background-color: $white;
+}
+
+.btn-primary {
+  background-color: $primary;
+  border-color: $primary;
+  &:hover {
+    background-color: darken($primary, 10%);
+  }
+}
+
+
+// 1️⃣ Importa las fuentes (desde Google Fonts o local)
+@import url('https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;700&family=Barlow:wght@400;500;700&display=swap');
+
+// 2️⃣ Define variables de tipografía
+$font-family-base: 'Barlow', sans-serif;              // cuerpo del texto
+$headings-font-family: 'Glacial Indifference', sans-serif; // títulos y encabezados
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// 3️⃣ Aplica estilos globales
+body {
+  font-family: $font-family-base;
+  font-weight: $font-weight-normal;
+  color: $dark;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $headings-font-family;
+  font-weight: $font-weight-bold;
+  color: $primary;
+  letter-spacing: 0.5px;
+}
+
+p, span, li {
+  font-family: $font-family-base;
+  font-weight: $font-weight-medium;
+  line-height: 1.6;
+}
+
+
+.section-title-1 {
+  @extend .rounded-4;
+  width: fit-content;
+  @extend .bg-leaf-200;
+  @extend .text-primary;
+  @extend .p-1;
+  @extend .px-3;
+  @extend .fw-bolder;
+}
+
+.section-title-2 {
+  @extend .rounded-4;
+  width: fit-content;
+  @extend .bg-leaf-200;
+  @extend .text-primary;
+  @extend .p-1;
+  @extend .px-3;
+  @extend .fw-bolder;
+}
+
+.footer-title {
+  @extend .text-primary;
+  @extend .fw-bold;
+  @extend .border-0;
+}
+
+.move-up {
+  transition: .5s ease;
+}
+.move-up:hover {
+  transform: translateY(-10px);
+  transition: ease .5s;
+}
+

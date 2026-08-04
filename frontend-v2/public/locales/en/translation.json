@@ -1,0 +1,22 @@
+{
+    "nav-bar" : {
+        "home": "Home",
+        "levers": "4 Levers",
+        "consequences": "Consequences",
+        "news": "News",
+        "languages": "Languages",
+        "english": "English",
+        "spanish": "Spanish",
+        "french": "French",
+        "german": "German",
+        "italian": "Italian"
+    },
+    "home" : {
+        "banner" : {
+            "title": "Together for a Better Planet",
+            "subtitle": "Building a healthier, more sustainable future for generations to come",
+            "button-learn-more": "Learn More",
+            "button-take-action": "Take action"
+        }
+    }
+}
