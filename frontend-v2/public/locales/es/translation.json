@@ -1,0 +1,22 @@
+{
+    "nav-bar" : {
+        "home": "Inicio",
+        "levers": "4 Palancas",
+        "consequences": "Concecuencias",
+        "news": "Noticias",
+        "languages": "Idiomas",
+        "english": "Inglés",
+        "spanish": "Español",
+        "french": "Francés",
+        "german": "Alemán",
+        "italian": "Italiano"
+    },
+    "home" : {
+        "banner" : {
+            "title": "Juntos por un mejor planeta",
+            "subtitle": "Construyendo un futuro más saludable y sostenible para las generaciones venideras.",
+            "button-learn-more": "Aprender más",
+            "button-take-action": "Tomar medidas"
+        }
+    }
+}
