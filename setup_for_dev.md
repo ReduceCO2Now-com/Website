@@ -1,721 +1,242 @@
-# The ReduceCO2Now Website
+## Updated frontend technology overview
 
-This repository contains the source code and technical documentation for the ReduceCO2Now web application.
+The frontend uses:
 
-ReduceCO2Now is a voluntary organisation. The application is expected to include:
+* React for building the user interface
+* TypeScript for typed JavaScript
+* Vite as the development server and build tool
+* React Query for loading and caching backend data
+* Axios for HTTP requests
+* Conventional CSS, primarily in `frontend/src/App.css`
 
-* a public multilingual website;
-* editable website content;
-* a content-management administration interface;
-* role-based access;
-* news and information pages; and
-* organisational workflows that may be expanded in later development phases.
+The current codebase contains substantial custom CSS. Bootstrap should only be listed as part of the project after confirming that `bootstrap` or `react-bootstrap` is installed and imported by the frontend.
 
-## Current status
+To verify this locally:
 
-The project currently contains:
+```powershell
+cd C:\coding\reduceco2now-app\frontend
+npm list bootstrap react-bootstrap
+```
 
-* a React and TypeScript frontend built with Vite;
-* a Strapi content-management backend;
-* English and Spanish frontend routes;
-* Strapi content-type definitions for the website content;
-* technical and architectural documentation; and
-* earlier prototype implementations retained for reference.
+A project using Bootstrap will commonly contain an import such as:
 
-The application is still under active development. A new developer can install and run both applications locally, but a populated Strapi database or content export is also required for the frontend to display the expected website content.
+```tsx
+import "bootstrap/dist/css/bootstrap.min.css";
+```
 
-## Technology overview
+or React component imports such as:
 
-### React
+```tsx
+import { Container, Row, Col } from "react-bootstrap";
+```
 
-React is the JavaScript library used to build the frontend user interface. The website is divided into reusable React components such as the navigation bar, header, footer, news cards and page sections.
+Bootstrap and custom CSS are not mutually exclusive. If Bootstrap is installed, it may provide layout utilities, responsive grids, buttons, navigation components, or baseline formatting, while `App.css` supplies the site-specific visual design.
 
-### TypeScript
+## Planned deployed database environments
 
-TypeScript adds static type checking to JavaScript. It helps detect incorrect values, missing properties and incompatible function calls during development.
-
-Frontend React files generally use the `.tsx` extension. Backend Strapi configuration and customisation files generally use `.ts`.
-
-### Vite
-
-Vite is the frontend development and build tool used by this repository. It starts a local development server, processes the TypeScript and React source files, and produces the frontend production build.
-
-The frontend is not currently configured as a Next.js application.
-
-### CSS and Tailwind
-
-The current frontend styling is primarily contained in conventional CSS files, including `frontend/src/App.css`.
-
-Tailwind CSS does not appear to be configured in the present repository. It should not be added as a setup requirement unless the project team makes a separate technical decision to adopt it.
-
-### Strapi
-
-Strapi is a headless content-management system.
-
-In this project, Strapi provides:
-
-* the administration interface at `/admin`;
-* REST API endpoints under `/api`;
-* editable website content;
-* multilingual content support;
-* content types and reusable components; and
-* permissions controlling which API operations are publicly accessible.
-
-The React frontend requests content from the Strapi API and renders it for website visitors.
-
-
-## Repository structure
-
-The important top-level directories are:
+Local development currently uses the SQLite database file:
 
 ```text
-reduceco2now-app/
-├── backend/
-├── frontend/
-├── prototype/
-├── docs/
-└── README.md
+backend/.tmp/data.db
 ```
 
-### `backend/`
+The deployed environments are intended to use managed PostgreSQL databases hosted by Supabase instead of SQLite.
 
-The `backend` directory contains the Strapi application.
-
-Important areas include:
+The proposed database arrangement is:
 
 ```text
-backend/
-├── config/                 # Strapi server, database, middleware and plugin configuration
-├── database/               # Database migrations
-├── public/
-│   └── uploads/            # Locally stored uploaded media
-├── src/
-│   ├── admin/              # Strapi administration customisation
-│   ├── api/                # Content types, routes, controllers and services
-│   ├── components/         # Reusable Strapi content components
-│   ├── extensions/         # Plugin extensions
-│   └── index.ts            # Strapi application bootstrap/customisation
-├── types/                  # Generated Strapi TypeScript definitions
-├── .env.example            # Example backend environment variables
-├── package.json
-└── tsconfig.json
+Local development
+└── Local SQLite database
+
+Testing or staging deployment
+└── Dedicated Supabase PostgreSQL project/database
+
+Production go-live deployment
+└── Separate dedicated Supabase PostgreSQL project/database
 ```
 
-Current Strapi content types include:
+The testing and production environments should not share the same database. Keeping them separate prevents test content, schema experiments, administrator accounts, permissions, migrations, and destructive testing from affecting the live website.
 
-* About Us;
-* Card Set;
-* Footer;
-* Lever Block;
-* Nav Bar;
-* News Post;
-* Static Header; and
-* Vision.
+Each deployed Strapi instance will connect to its corresponding Supabase PostgreSQL database using server-side environment variables. Database passwords and connection strings must remain in the deployment platform’s secret or environment-variable configuration and must not be exposed to the Vite frontend or committed to Git.
 
-### `frontend/`
+Supabase provides a full PostgreSQL database. A persistent Strapi backend would normally use either a direct PostgreSQL connection or Supabase’s session-mode pooler, depending on whether the hosting environment supports the required network connection. Transaction-mode pooling is generally intended for short-lived or serverless workloads and may be less suitable for a conventional continuously running Strapi process.
 
-The `frontend` directory contains the React application.
+SSL should be used for deployed database connections. The final connection method, certificate settings, pooling choice, and hosting-provider configuration should be confirmed when the Strapi hosting platform has been selected.
 
-Important areas include:
+## Deployment architecture — intended direction
+
+The precise hosting providers and operational details remain open, but the deployment should follow a conventional separation between the frontend, backend, database, and media storage.
+
+A likely architecture is:
 
 ```text
-frontend/
-├── public/                 # Static files such as the favicon and icons
-├── src/
-│   ├── components/         # Reusable website sections and UI components
-│   ├── locale/             # English and Spanish route and static-language files
-│   ├── pages/              # Complete website pages
-│   ├── services/           # Strapi API request functions and utilities
-│   ├── App.tsx             # Main application layout and route selection
-│   ├── App.css             # Current global application styling
-│   └── main.tsx            # React application entry point
-├── .env                    # Frontend environment configuration
-├── index.html              # Vite HTML entry point
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+Users
+  │
+  ▼
+Vite frontend deployed as static files
+  │
+  │ HTTPS API requests
+  ▼
+Strapi backend running as a persistent Node.js service
+  │
+  ├── PostgreSQL database on Supabase
+  │
+  └── Persistent or external media storage
 ```
 
-The frontend currently contains components such as:
+### Vite frontend
 
-* `NavBar`;
-* `Footer`;
-* `Header`;
-* `AboutUs`;
-* `WhatWeDo`;
-* `FocusAreas`;
-* `Vision`;
-* `NewsCard`; and
-* `SystemView`.
-
-It includes separate English and Spanish route definitions.
-
-### `prototype/`
-
-The `prototype` directory contains earlier or experimental versions of the frontend and backend.
-
-These files should generally be treated as reference material rather than the active application. Development work should normally take place in the root-level `frontend` and `backend` directories unless a task explicitly concerns a prototype.
-
-### `docs/`
-
-The `docs` directory contains technical documentation that belongs close to the codebase.
-
-Product ownership, Scrum ceremonies, meeting notes, user stories, backlog management and general planning documents are maintained outside the repository.
-
-## Prerequisites
-
-A developer should install the following software:
-
-* Git;
-* Node.js;
-* npm;
-* a code editor, such as Visual Studio Code;
-* access to the GitHub repository; and
-* a supported local database or the project’s agreed development database.
-
-### Recommended Node.js version
-
-The project has been run successfully with:
-
-```text
-Node.js 22.23.2
-```
-
-A Node version manager is recommended so that developers can switch versions without changing the system-wide Node installation.
-
-On Windows, a developer may use NVM for Windows.
-
-Verify the installed versions:
+The React/Vite frontend should normally be built with:
 
 ```powershell
-node --version
-npm --version
-git --version
+npm run build
 ```
 
-## Downloading the repository
+Vite places the production output in `dist` by default. That directory can be deployed to a static hosting platform or CDN.
 
-Choose a local development directory and clone the repository:
-
-```powershell
-cd C:\coding
-git clone https://github.com/JaimeHyland/reduceco2now-app.git
-cd reduceco2now-app
-```
-
-Developers who have already cloned the repository should update it before starting work:
-
-```powershell
-git switch main
-git pull origin main
-```
-
-Confirm the repository status:
-
-```powershell
-git status
-```
-
-The working tree should normally be clean before a new branch is created.
-
-## Backend setup
-
-### 1. Open the backend directory
-
-```powershell
-cd C:\coding\reduceco2now-app\backend
-```
-
-### 2. Select the project Node.js version
-
-When using NVM:
-
-```powershell
-nvm use 22.23.2
-```
-
-### 3. Install backend dependencies
-
-```powershell
-npm install
-```
-
-Do not run `npm audit fix --force` automatically. Forced dependency upgrades can introduce breaking changes and should be reviewed through a separate development task.
-
-### 4. Create the backend environment file
-
-Copy the example file:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-The local `.env` file should contain values similar to:
+The frontend deployment requires an environment-specific API base URL, for example:
 
 ```env
-HOST=127.0.0.1
-PORT=1337
-APP_KEYS="first-random-key,second-random-key,third-random-key,fourth-random-key"
-API_TOKEN_SALT=unique-random-value
-ADMIN_JWT_SECRET=unique-random-value
-TRANSFER_TOKEN_SALT=unique-random-value
-JWT_SECRET=unique-random-value
-ENCRYPTION_KEY=unique-random-value
+VITE_API_URL=https://api-test.example.org
 ```
 
-Use a different long random value for each secret.
+for testing, and:
 
-`HOST=127.0.0.1` restricts the development server to the local computer. Use `HOST=0.0.0.0` only when the backend deliberately needs to be reachable from another device on the local network.
-
-Never commit the real `.env` file or its secret values.
-
-### 5. Confirm the database configuration
-
-Inspect:
-
-```text
-backend/config/database.ts
+```env
+VITE_API_URL=https://api.example.org
 ```
 
-The team must document which database is expected for local development.
+for production.
 
-A local SQLite database may be used for isolated development, but the source-code repository alone does not necessarily include the website’s populated content.
+Because Vite environment variables are compiled into the frontend build, the testing and production frontends should be built separately with the correct backend URL for each environment.
 
-The developer may therefore also need one of the following:
+The Vite development or preview server should not be used as the production web server. `vite preview` is intended only for locally checking the production build.
 
-* a Strapi data export;
-* a database backup;
-* a seed script;
-* a copy of an approved development SQLite database; or
-* access to a shared development database.
+### Strapi backend
 
-### 6. Start Strapi
+Strapi should run as a persistent Node.js web service or container rather than as a static or purely serverless application.
 
-```powershell
-npm run develop
-```
+The deployed backend will require environment-specific configuration for:
 
-The backend should become available at:
+* the PostgreSQL connection;
+* Strapi application keys and secrets;
+* administrator authentication secrets;
+* API token salt;
+* transfer token salt;
+* public backend URL;
+* frontend origins and CORS rules;
+* media-storage configuration;
+* Node environment;
+* host and port settings.
 
-```text
-http://localhost:1337
-```
+The testing backend should connect only to the testing Supabase database.
 
-The administration interface should become available at:
+The production backend should connect only to the production Supabase database.
 
-```text
-http://localhost:1337/admin
-```
+Strapi secrets should also be different between testing and production.
 
-On the first run, Strapi may ask the developer to create a local administrator account.
+### Media storage
 
-Keep this terminal running while working on the frontend.
-
-## Strapi permissions
-
-The public frontend makes unauthenticated requests to Strapi.
-
-For public website content, the Strapi `Public` role may need read-only access to the relevant content types.
-
-In the Strapi administration interface, go to:
-
-```text
-Settings
-→ Users & Permissions plugin
-→ Roles
-→ Public
-```
-
-For content intended for public display, enable only the required read actions:
-
-* `find`;
-* `findOne`.
-
-Do not enable public create, update or delete actions unless this has been explicitly approved.
-
-The currently used public content types include:
-
-* About Us;
-* Card Set;
-* Footer;
-* Nav Bar;
-* Static Header;
-* Vision; and
-* any other content type requested by the public frontend.
-
-These settings belong to the database used by the Strapi instance. Changing them in a local database affects only that local database. Changing them in a shared database affects every backend connected to that database.
-
-## Strapi content and media
-
-The repository contains the Strapi schemas, controllers, routes and services, but a fresh local database may not contain the website’s actual content.
-
-Without populated and published entries, the frontend may receive `404 Not Found` responses for endpoints such as:
-
-```text
-/api/about-us
-/api/footer
-/api/nav-bar
-/api/vision
-/api/card-sets/{documentId}
-/api/static-headers/{documentId}
-```
-
-Developers must therefore be given an approved method of loading development content.
-
-Some frontend components currently request entries using specific Strapi document IDs. These IDs must exist in the database used by the frontend. Importing the correct development data is preferable to changing IDs manually on every workstation.
-
-Uploaded images and other media may also need to be restored into:
+The local backend currently stores uploaded media under:
 
 ```text
 backend/public/uploads/
 ```
 
-or into the configured external media-storage service.
+A deployed Strapi instance must not rely on temporary or ephemeral local storage unless its hosting service provides a persistent disk and that disk is included in the backup strategy.
 
-## Frontend setup
+The final media approach remains open. Conventional options include:
 
-Open a second terminal. Leave the backend running in the first terminal.
+* persistent storage attached to the Strapi service;
+* an object-storage service compatible with Strapi’s upload providers;
+* a managed media platform.
 
-### 1. Open the frontend directory
+Whichever option is selected, testing and production media should normally be isolated from one another.
 
-```powershell
-cd C:\coding\reduceco2now-app\frontend
-```
+The PostgreSQL database stores media metadata and relationships, while the uploaded binary files are generally stored separately. Database migration alone may therefore not transfer all website media.
 
-### 2. Select the Node.js version
+## Suggested environment separation
 
-```powershell
-nvm use 22.23.2
-```
+The intended environments are:
 
-### 3. Install frontend dependencies
-
-```powershell
-npm install
-```
-
-The repository’s `package.json` and lock file define the React, TypeScript, Vite and other frontend dependencies. React, TypeScript and Vite do not need to be installed globally.
-
-### 4. Configure the frontend environment
-
-Inspect:
+### Local development
 
 ```text
-frontend/.env
+Frontend: Vite development server
+Backend: local Strapi development server
+Database: local SQLite data.db
+Media: backend/public/uploads
 ```
 
-It must point the frontend API requests to the correct Strapi environment.
-
-The value will normally resemble:
-
-```env
-VITE_API_URL=http://localhost:1337
-```
-
-Use the environment-variable name already expected by the source code. Do not rename it without also updating the code that reads it.
-
-Environment variables exposed to Vite frontend code must begin with `VITE_`.
-
-### 5. Start the frontend
-
-```powershell
-npm run dev
-```
-
-Vite should print a local URL, normally:
+### Testing or staging
 
 ```text
-http://localhost:5173/
+Frontend: static Vite deployment
+Backend: deployed Strapi Node.js service
+Database: testing Supabase PostgreSQL project
+Media: testing media storage
+Purpose: integration testing, CMS review and release validation
 ```
 
-The English site is currently expected under:
+### Production
 
 ```text
-http://localhost:5173/en
+Frontend: production static Vite deployment
+Backend: production Strapi Node.js service
+Database: production Supabase PostgreSQL project
+Media: production media storage
+Purpose: public go-live environment
 ```
 
-Leave the frontend terminal running.
+The same application source code should ideally be deployable to testing and production. Environment-specific differences should be supplied through environment variables, secrets, database contents, domain configuration, and deployment settings rather than through manually edited source code.
 
-## Expected local development processes
+## Content promotion between environments
 
-A normal local development session uses two terminals:
+Testing and production will have separate PostgreSQL databases. Content entered in the testing CMS will therefore not automatically appear in production.
 
-```text
-Terminal 1
-backend/
-npm run develop
-```
+Before go-live, the team should define a deliberate process for transferring or recreating:
 
-```text
-Terminal 2
-frontend/
-npm run dev
-```
+* content entries;
+* localizations;
+* media files;
+* role and API permissions;
+* administrator setup where appropriate;
+* required permanent records such as headers and Card Sets.
 
-The services should then be available at:
+Possible approaches include:
 
-```text
-Frontend:       http://localhost:5173
-English site:   http://localhost:5173/en
-Strapi API:     http://localhost:1337/api
-Strapi admin:   http://localhost:1337/admin
-```
+* Strapi import and export tooling;
+* Strapi transfer tooling;
+* database-level PostgreSQL backup and restore;
+* controlled seed scripts;
+* manually recreating a small set of content.
 
-## Troubleshooting
+The selected process should preserve relationships, locales, document identifiers where required, publication state, and media references.
 
-### The frontend shows a blank black page
+Using stable semantic slugs for permanent page sections will reduce the frontend’s dependence on environment-specific database identifiers.
 
-The black background is part of the current CSS design. A completely blank page is not expected.
+## Deployment decisions intentionally left open
 
-Open the browser developer tools:
+The following choices do not need to be fixed in the local setup guide yet:
 
-```text
-F12 → Console
-```
+* the static hosting provider for the Vite frontend;
+* the Node.js or container hosting provider for Strapi;
+* whether frontend and backend use separate subdomains;
+* the media-storage provider;
+* the CI/CD platform;
+* the exact Supabase direct or pooled connection mode;
+* the backup and disaster-recovery schedule;
+* the content-promotion workflow.
 
-Then reload the page and inspect the first red error.
+The architecture should nevertheless preserve these principles:
 
-### Strapi API requests return 403
-
-A `403 Forbidden` response normally means that the request reached Strapi, but the current role does not have permission to perform the requested action.
-
-Review the read permissions for the Strapi `Public` role.
-
-### Strapi API requests return 404
-
-A `404 Not Found` response normally means one of the following:
-
-* the requested entry does not exist in the current database;
-* the requested locale has not been created;
-* the entry exists but is not published;
-* the frontend contains a document ID from a different database; or
-* the route or API name is incorrect.
-
-Check the Content Manager and confirm that the English entry exists and is published.
-
-### The frontend crashes after an API error
-
-Some current components assume that API data is always present. For example, they may call `.map()` or read `.title` before checking whether the request succeeded.
-
-Frontend components should eventually be updated to:
-
-* handle loading states;
-* handle API errors;
-* handle missing or empty data;
-* avoid reading properties from `undefined`; and
-* display a useful error or placeholder instead of crashing the complete application.
-
-### Vite or Strapi cannot find dependencies
-
-Remove and reinstall the local dependencies:
-
-```powershell
-Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
-npm install
-```
-
-Run this separately in the affected `frontend` or `backend` directory.
-
-## Tests and quality checks
-
-The team should define and document the commands used for:
-
-* frontend linting;
-* frontend unit tests;
-* frontend component tests;
-* frontend production builds;
-* backend tests;
-* API integration tests; and
-* end-to-end tests.
-
-At minimum, changes should pass the repository’s available lint and build commands before a pull request is opened.
-
-Likely frontend checks include:
-
-```powershell
-npm run lint
-npm run build
-```
-
-Run only scripts that are actually defined in the relevant `package.json`.
-
-## Recommended environment model
-
-The project should not use one database for every environment.
-
-The recommended model is:
-
-### Local developer environment
-
-Each developer should normally have:
-
-* a local frontend;
-* a local Strapi backend;
-* an isolated local database;
-* local or development-only media; and
-* non-production secrets.
-
-A repeatable data import or seed process should provide safe example content.
-
-### Shared development environment
-
-The team should have a shared development deployment with:
-
-* its own frontend;
-* its own Strapi backend;
-* a shared development database;
-* development-only media storage; and
-* no real personal or confidential production data.
-
-This environment is useful for integrating work from multiple developers.
-
-### Staging or deployed-test environment
-
-The staging environment should closely resemble production and have:
-
-* its own frontend;
-* its own Strapi backend;
-* its own staging database;
-* its own media storage;
-* staging-specific secrets; and
-* controlled test content.
-
-Release candidates should be tested here before production deployment.
-
-### Production environment
-
-Production must have:
-
-* its own frontend;
-* its own Strapi backend;
-* its own production database;
-* production media storage;
-* production-only secrets;
-* restricted administration access;
-* automated backups; and
-* monitoring and recovery procedures.
-
-Production data and credentials must never be used casually in local development.
-
-### Recommended data flow
-
-Code should move forward through the environments:
-
-```text
-developer branch
-→ shared development
-→ staging
-→ production
-```
-
-Database schema changes and approved content migrations should also move forward through controlled migration or import processes.
-
-Production databases should not be shared with development or staging. When production data is copied for testing, it must first be minimised and anonymised as required by the organisation’s privacy rules.
-
-## Git workflow
-
-### 1. Update `main`
-
-```powershell
-git switch main
-git pull origin main
-```
-
-### 2. Create a feature branch
-
-Use a short descriptive branch name:
-
-```powershell
-git switch -c feature/developer-setup-guide
-```
-
-Other examples:
-
-```text
-fix/navbar-error-handling
-feature/news-page
-docs/backend-setup
-```
-
-### 3. Make and review changes
-
-Check changed files:
-
-```powershell
-git status
-git diff
-```
-
-Run the relevant tests, linting and builds.
-
-### 4. Stage and commit the changes
-
-```powershell
-git add README.md
-git commit -m "docs: add local development setup guide"
-```
-
-For application changes, stage only the files that belong to the task.
-
-### 5. Push the branch
-
-```powershell
-git push -u origin feature/developer-setup-guide
-```
-
-### 6. Open a pull request
-
-On GitHub:
-
-1. Open the repository.
-2. Select the recently pushed branch.
-3. Choose **Compare & pull request**.
-4. Confirm that the pull request targets `main`.
-5. Give the pull request a clear title.
-6. Explain what changed, why it changed and how it was tested.
-7. Identify any configuration, database or deployment implications.
-8. Request review from the appropriate team member.
-
-Do not commit directly to `main` unless the team’s repository policy explicitly allows it.
-
-### 7. Address review comments
-
-Make any requested changes on the same branch, commit them and push again:
-
-```powershell
-git add .
-git commit -m "docs: address setup guide review"
-git push
-```
-
-The pull request updates automatically.
-
-## Repository documentation
-
-The Markdown documentation in this repository is limited to technical material that belongs close to the codebase.
-
-### Website and application structure
-
-* [Application structure](docs/architecture/application-structure.md)
-* [Public site structure](docs/architecture/public-site-structure.md)
-* [Admin structure](docs/architecture/admin-structure.md)
-* [Roles and permissions](docs/architecture/roles-and-permissions.md)
-* [Content model](docs/architecture/content-model.md)
-* [Privacy and data minimisation](docs/architecture/privacy-and-data-minimisation.md)
-* [Technical decisions](docs/architecture/decisions/)
-
-### AI-assisted working process
-
-* [AI working principles](docs/ai/ai-working-principles.md)
-* [Prompt patterns](docs/ai/prompt-patterns.md)
-* [AI review log](docs/ai/ai-review-log.md)
-
-### External project documents
-
-* [Project links](docs/project-links.md)
-
-## Documentation boundary
-
-Product ownership, Scrum process, meeting notes, user stories, backlog management and planning discussions are handled outside this repository.
-
-The repository may link to external documents where useful, but it should not duplicate them.
+1. The Vite frontend is built and deployed as static assets.
+2. Strapi runs as a persistent backend service.
+3. Testing and production have separate PostgreSQL databases.
+4. Secrets are stored outside the repository.
+5. The browser communicates with Strapi, not directly with the Strapi PostgreSQL database.
+6. Uploaded media uses durable storage.
+7. Testing and production content and media remain isolated.
+8. Deployments are reproducible from committed source code and environment configuration.
+9. Permanent CMS sections use stable semantic identifiers where practical.
+10. Schema and content changes are tested before production deployment.
