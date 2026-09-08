@@ -40,19 +40,15 @@ body {
 }
 
 .logo {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: #ffffff;
+    display: flex;
+    align-items: center;
     text-decoration: none;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #34d399 0%, #22d3ee 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
-.logo span {
-    -webkit-text-fill-color: #34d399;
+.logo img {
+    display: block;
+    width: 180px;
+    height: auto;
 }
 
 .nav-links {
