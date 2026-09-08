@@ -28,8 +28,11 @@ const NavBar = () => {
   return (
     <nav className="navbar">
       <div className="container">
-        <Link to="/" className="logo" aria-label="ReduceCO2Now home">
-          <img src="/assets/ReduceCO2Nowlogo.png" alt="ReduceCO2Now" />
+        <Link
+          to={`/${location.pathname.split("/")[1] || "en"}`}
+          className="logo"
+        >
+          <img src="/assets/ReduceCO2Nowlogo.png" alt="ReduceCO2Now home" />
         </Link>
         <Routes>
           <Route path="/en/*" element={<NavBarOption locale="en" />} />
@@ -40,7 +43,7 @@ const NavBar = () => {
             onChange={({ target }) => handleChange(target.value)}
             defaultValue={location.pathname.split("/")[1]}
           >
-            {languageList.data.map((language: Language) => {
+            {(languageList.data ?? []).map((language: Language) => {
               return (
                 <option key={language.id} value={language.code}>
                   {language.name}
